@@ -15,9 +15,10 @@ A Claude Code plugin that integrates JIRA with your development workflow using [
 - **`/triage`** - Audit tickets for missing fields and quality issues
 
 ### Skills (Auto-Activated)
-- **JIRA Ticket Creator** - Creates well-structured tickets with What/Why/Acceptance Criteria
-- **JIRA Triage** - Validates ticket quality when you ask about readiness
-- **Story Point Estimator** - Helps estimate tickets using complexity analysis
+- **jira-ticket-creator** - Creates well-structured tickets with What/Why/Acceptance Criteria, duplicate check, story points, activity type, and validation gate
+- **jira-triage** - Validates ticket quality and sprint readiness
+- **jira-story-pointer** - Estimates story points using complexity analysis and historical comparison
+- **Is Ticket Implemented?** - Validates whether a ticket's requirements are implemented in the codebase
 
 ## Prerequisites
 
@@ -30,10 +31,17 @@ brew install ankitpokhrel/jira-cli/jira-cli
 
 **Linux:**
 ```bash
-# Download from releases
-curl -LO https://github.com/ankitpokhrel/jira-cli/releases/latest/download/jira_linux_amd64.tar.gz
-tar -xzf jira_linux_amd64.tar.gz
-sudo mv jira /usr/local/bin/
+# Download latest release
+VERSION=$(curl -sL https://api.github.com/repos/ankitpokhrel/jira-cli/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+if [ -z "$VERSION" ]; then
+    echo "Error: Failed to fetch latest jira-cli version"
+    exit 1
+fi
+curl -LO "https://github.com/ankitpokhrel/jira-cli/releases/download/${VERSION}/jira_${VERSION#v}_linux_x86_64.tar.gz"
+tar -xzf "jira_${VERSION#v}_linux_x86_64.tar.gz"
+sudo mv "jira_${VERSION#v}_linux_x86_64/bin/jira" /usr/local/bin/
+rm -rf "jira_${VERSION#v}_linux_x86_64" "jira_${VERSION#v}_linux_x86_64.tar.gz"
+
 ```
 
 **Other methods:** See [jira-cli installation docs](https://github.com/ankitpokhrel/jira-cli#installation)
@@ -156,10 +164,11 @@ Just ask naturally to create tickets:
 - "Can you create a JIRA ticket for this work?"
 
 The creator ensures:
+- Duplicate check before creating
 - **What/Why/Acceptance Criteria** structure
-- Story points assignment
-- Activity type categorization
-- All required fields populated
+- Story points via `jira-story-pointer` skill
+- Activity type via Sankey capacity allocation flow
+- Validation gate — blocks creation until all required fields are set
 
 #### Ticket Triage
 Just ask naturally:
@@ -179,16 +188,33 @@ The estimator analyzes:
 - Similar completed tickets
 - Team velocity patterns
 
+#### Ticket Implementation Validation
+Check if a ticket's requirements are implemented:
+```
+/is-ticket-implemented HYPERFLEET-123          # local codebase
+/is-ticket-implemented HYPERFLEET-123 github   # remote (infers repo from ticket)
+```
+Or ask naturally: "Is HYPERFLEET-123 implemented?" / "Check if this ticket is done"
+
+Generates an acceptance report with:
+- Completion percentage
+- Implemented items with file:line references
+- Partially implemented and missing items
+- Manual verification needed
+- Recommended next actions
+
 ## Story Points Reference
 
 | Points | Meaning | Example |
 |--------|---------|---------|
+| 0 | Tracking Only | Quick/easy task with stakeholder value |
 | 1 | Trivial | Config change, typo fix |
-| 2 | Small | Well-understood, few files |
-| 3 | Medium-Small | Clear scope, limited testing |
-| 5 | Medium | Multiple components |
-| 8 | Large | Significant work, dependencies |
-| 13 | Very Large | Consider breaking down |
+| 3 | Straightforward | Time consuming but fairly straightforward |
+| 5 | Medium | Requires investigation, design, collaboration |
+| 8 | Large | Significant work, dependencies. Design doc required |
+| 13 | Too Large | Must be broken down into smaller stories |
+
+See [jira-story-pointer SKILL.md](./skills/jira-story-pointer/SKILL.md) for canonical definitions and estimation methodology.
 
 ## Troubleshooting
 

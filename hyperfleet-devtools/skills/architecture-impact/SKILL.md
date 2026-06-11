@@ -1,11 +1,13 @@
 ---
-name: Architecture Impact
+name: architecture-impact
 description: Analyzes code changes in HyperFleet component repositories (API, Sentinel, Adapter, Broker) to determine if architecture documentation needs updates using directory-based scope and complete document reading with single comprehensive LLM analysis. Activates when users ask "analyze architecture impact", "check if docs need update", or use /architecture-impact.
 ---
 
 # Architecture Impact Analyzer
 
 This skill analyzes code changes in HyperFleet component repositories and determines whether architecture documentation in the `openshift-hyperfleet/architecture` repository needs to be updated.
+
+> **Note:** This skill operates on code repositories (API, Sentinel, Adapter, Broker), not JIRA components. For the full list of valid JIRA components, see `ticket-hygiene.md` in the architecture repo.
 
 ## When to Use This Skill
 
@@ -228,8 +230,8 @@ Format and display the agent's analysis report to the user:
      3. Submit a PR to openshift-hyperfleet/architecture
      4. Link the architecture PR to your code PR
 
-     Tip: You can use the hyperfleet-jira:jira-ticket-creator skill to create
-     tracking tickets for documentation updates.
+     Tip: You can ask to create tracking tickets for documentation updates.
+     The jira-ticket-creator skill auto-activates when you request ticket creation.
      ```
 
    - If no updates needed:
@@ -350,7 +352,7 @@ Debug information:
 **Before submitting a PR:**
 1. Run this skill to check documentation impact
 2. Address any HIGH priority documentation updates
-3. Create JIRA tickets for MEDIUM/LOW priority updates if needed
+3. Track MEDIUM/LOW priority updates if needed
 4. Link documentation PRs to your code PR
 
 **For best results:**
@@ -359,5 +361,4 @@ Debug information:
 - Prioritize HIGH impact documentation updates
 
 **Integration with other skills:**
-- Use `hyperfleet-jira:jira-ticket-creator` to create tracking tickets for doc updates
 - Use `hyperfleet-architecture` to understand existing documentation structure
